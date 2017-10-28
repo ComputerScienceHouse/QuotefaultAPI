@@ -46,10 +46,9 @@ class Quote(db.Model):
 
 @app.route('/between/<start>/<limit>')
 def between(start, limit):
-    if datetime.strptime(start, "%Y-%m-%d") > datetime.strptime(limit, "%Y-%m-%d"):
-        quotes = Quote.query.filter_by(Quote.quoteTime.between(start, limit)).all()
+    if datetime.strptime(start, "%Y-%m-%d") < datetime.strptime(limit, "%Y-%m-%d"):
+        quotes = Quote.query.filter(Quote.quoteTime.between(start, limit)).all()
         return jsonify(parse_as_json(quotes))
-
     quotes = Quote.query.all
     return jsonify(parse_as_json(quotes))
 
