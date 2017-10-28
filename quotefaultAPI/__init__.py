@@ -44,7 +44,7 @@ class Quote(db.Model):
         self.speaker = speaker
 
 
-@app.route('/between/<start>/<limit>')
+@app.route('/between/<start>/<limit>', methods=['GET'])
 def between(start, limit):
     if datetime.strptime(start, "%Y-%m-%d") < datetime.strptime(limit, "%Y-%m-%d"):
         quotes = Quote.query.filter(Quote.quoteTime.between(start, limit)).all()
@@ -53,7 +53,7 @@ def between(start, limit):
     return jsonify(parse_as_json(quotes))
 
 
-@app.route('/all')
+@app.route('/all', methods=['GET'])
 def index():
     db.create_all()
 
@@ -76,7 +76,7 @@ def index():
     return jsonify(parse_as_json(quotes))
 
 
-@app.route('/random')
+@app.route('/random', methods=['GET'])
 def random_quote():
     date = request.args.get('date')
     submitter = request.args.get('submitter')
@@ -101,7 +101,7 @@ def random_quote():
     return jsonify(return_json(quotes[random_index]))
 
 
-@app.route('/newest')
+@app.route('/newest', methods=['GET'])
 def newest():
     date = request.args.get('date')
     submitter = request.args.get('submitter')
@@ -126,7 +126,7 @@ def return_json(quote):
 
 def parse_as_json(quotes, quote_json=None):
     if quote_json is None:
-        quote_json = {}
+        quote_json = []
     for quote in quotes:
-        quote_json[quote.id] = return_json(quote)
+        quote_json.append(return_json(quote))
     return quote_json
