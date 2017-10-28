@@ -44,26 +44,36 @@ class Quote(db.Model):
         self.speaker = speaker
 
 
+@app.route('/between/<start>/<limit>')
+def between(start, limit):
+    if datetime.strptime(start, "%Y-%m-%d") > datetime.strptime(limit, "%Y-%m-%d"):
+        quotes = Quote.query.filter_by(Quote.quoteTime.between(start, limit)).all()
+        return jsonify(parse_as_json(quotes))
+
+    quotes = Quote.query.all
+    return jsonify(parse_as_json(quotes))
+
+
 @app.route('/all')
 def index():
     db.create_all()
-    quotes = Quote.query.all()  # collect all quote rows in the Quote db
 
     date = request.args.get('date')
     submitter = request.args.get('submitter')
 
     if date is not None and submitter is not None:
-        quotes = Quote.query.filter_by(quoteTime=date, submitter=submitter)
+        quotes = Quote.query.filter_by(quoteTime=date, submitter=submitter).all()
         return jsonify(parse_as_json(quotes))
 
-    if date is not None:
-        quotes = Quote.query.filter_by(quoteTime=date)
+    elif date is not None:
+        quotes = Quote.query.filter_by(quoteTime=date).all()
         return jsonify(parse_as_json(quotes))
 
-    if submitter is not None:
+    elif submitter is not None:
         quotes = Quote.query.filter_by(submitter=submitter)
         return jsonify(parse_as_json(quotes))
 
+    quotes = Quote.query.all()  # collect all quote rows in the Quote db
     return jsonify(parse_as_json(quotes))
 
 
