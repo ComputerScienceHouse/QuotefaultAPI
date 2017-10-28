@@ -45,7 +45,17 @@ class Quote(db.Model):
 
 @app.route('/')
 def index():
-    return jsonify({'hello': 'world'})
+    db.create_all()
+    quote_json = {}
+    quotes = Quote.query.all()  # collect all quote rows in the Quote db
+    for quote in reversed(quotes):
+        quote_json[quote.id] = {
+            'quote': quote.quote,
+            'submitter': quote.submitter,
+            'speaker': quote.speaker,
+            'quoteTime': quote.quoteTime,
+        }
+    return jsonify(quote_json)
 
 
 @app.route('/random')
@@ -72,4 +82,3 @@ def newest():
         return jsonify({'friday': 'my dudes'})
 
     return jsonify({'call': 'the police'})
-
