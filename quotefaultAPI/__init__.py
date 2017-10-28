@@ -60,11 +60,13 @@ def index():
 
 @app.route('/random')
 def random():
+    quote_json = {}
     date = request.args.get('date')
     submitter = request.args.get('submit')
 
     if date is not None:
-        return jsonify({'cadfad': 'the police'})
+        quotes = Quote.query.filter_by(quoteTime=date)
+
     if submitter is not None:
         return jsonify({'friday': 'my dudes'})
 
