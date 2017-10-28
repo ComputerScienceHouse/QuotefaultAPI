@@ -1,13 +1,15 @@
+import binascii
 import json
 import os
 import random
 from datetime import datetime
 
-import binascii
+import markdown as markdown
 import requests
 from flask import Flask, request, jsonify, session
 from flask_pyoidc.flask_pyoidc import OIDCAuthentication
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import UniqueConstraint
 
 app = Flask(__name__)
 
@@ -49,20 +51,20 @@ class APIKey(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     hash = db.Column(db.String(64), unique=True)
     owner = db.Column(db.String(80))
+    reason = db.Column(db.String(120))
+    __table_args__ = (UniqueConstraint('owner', 'reason', name='unique_key'),)
 
-    def __init__(self, owner):
+    def __init__(self, owner, reason):
         self.hash = binascii.b2a_hex(os.urandom(10))
         self.owner = owner
+        self.reason = reason
 
 
-def get_metadata():
-    uuid = str(session["userinfo"].get("sub", ""))
-    uid = str(session["userinfo"].get("preferred_username", ""))
-    metadata = {
-        "uuid": uuid,
-        "uid": uid
-    }
-    return metadata
+@app.route('/', methods=['GET'])
+def index():
+    db.create_all()
+    f = open('README.md', 'r')
+    return markdown.markdown(f.read())
 
 
 @app.route('/<api_key>/between/<start>/<limit>', methods=['GET'])
@@ -103,7 +105,7 @@ def create_quote(api_key):
 
 
 @app.route('/<api_key>/all', methods=['GET'])
-def index(api_key):
+def all_quotes(api_key):
     if check_key(api_key):
         db.create_all()
 
@@ -174,14 +176,27 @@ def newest(api_key):
 
 
 @auth.oidc_auth
-@app.route('/generatekey')
-def generate_API_key():
+@app.route('/generatekey/<reason>')
+def generate_api_key(reason):
     metadata = get_metadata()
-    new_key = APIKey(metadata['uid'])
-    db.session.add(new_key)
-    db.session.flush()
-    db.session.commit()
-    return new_key.hash
+    if not check_key_unique(metadata['uid'], reason):
+        new_key = APIKey(metadata['uid'], reason)
+        db.session.add(new_key)
+        db.session.flush()
+        db.session.commit()
+        return new_key.hash
+    else:
+        return "There's already a key with this reason for this user!"
+
+
+def get_metadata():
+    uuid = str(session["userinfo"].get("sub", ""))
+    uid = str(session["userinfo"].get("preferred_username", ""))
+    metadata = {
+        "uuid": uuid,
+        "uid": uid
+    }
+    return metadata
 
 
 def return_json(quote):
@@ -201,7 +216,13 @@ def parse_as_json(quotes, quote_json=None):
     return quote_json
 
 
-def check_key(api_key):
+def check_key(api_key, ):
     keys = APIKey.query.filter_by(hash=api_key).all()
+    if len(keys) > 0:
+        return True
+
+
+def check_key_unique(owner, reason):
+    keys = APIKey.query.filter_by(owner=owner, reason=reason).all()
     if len(keys) > 0:
         return True
