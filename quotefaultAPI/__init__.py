@@ -1,6 +1,7 @@
 import os
 import subprocess
 from datetime import datetime
+import random
 
 import requests
 from flask import Flask, render_template, request, flash, session, make_response, jsonify
@@ -43,17 +44,17 @@ class Quote(db.Model):
         self.speaker = speaker
 
 
-@app.route('/')
+@app.route('/all')
 def index():
     db.create_all()
     quotes = Quote.query.all()  # collect all quote rows in the Quote db
-    return jsonify(parse_as_json(quotes))
 
-
-@app.route('/random')
-def random():
     date = request.args.get('date')
     submitter = request.args.get('submitter')
+
+    if date is not None and submitter is not None:
+        quotes = Quote.query.filter_by(quoteTime=date, submitter=submitter)
+        return jsonify(parse_as_json(quotes))
 
     if date is not None:
         quotes = Quote.query.filter_by(quoteTime=date)
@@ -63,7 +64,34 @@ def random():
         quotes = Quote.query.filter_by(submitter=submitter)
         return jsonify(parse_as_json(quotes))
 
-    return jsonify({})
+    return jsonify(parse_as_json(quotes))
+
+
+@app.route('/random')
+def random_quote():
+    quotes = Quote.query.all()  # collect all quote rows in the Quote db
+
+    date = request.args.get('date')
+    submitter = request.args.get('submitter')
+
+    random_index = random.randint(0, len(quotes))
+    return jsonify(return_json(quotes[random_index]))
+
+    # jsonnedQuotes = parse_as_json(quotes)
+    #
+    # if date is not None and submitter is not None:
+    #     quotes = Quote.query.filter_by(quoteTime=date, submitter=submitter)
+    #     return jsonify(parse_as_json(quotes))
+    #
+    # if date is not None:
+    #     quotes = Quote.query.filter_by(quoteTime=date)
+    #     return jsonify(parse_as_json(quotes))
+    #
+    # if submitter is not None:
+    #     quotes = Quote.query.filter_by(submitter=submitter)
+    #     return jsonify(parse_as_json(quotes))
+    #
+    # return jsonify(parse_as_json(quotes))
 
 
 @app.route('/newest')
@@ -79,14 +107,18 @@ def newest():
     return jsonify({'call': 'the police'})
 
 
+def return_json(quote):
+    return {quote.id: {
+        'quote': quote.quote,
+        'submitter': quote.submitter,
+        'speaker': quote.speaker,
+        'quoteTime': quote.quoteTime,
+    }}
+
+
 def parse_as_json(quotes, quote_json=None):
     if quote_json is None:
         quote_json = {}
     for quote in quotes:
-        quote_json[quote.id] = {
-            'quote': quote.quote,
-            'submitter': quote.submitter,
-            'speaker': quote.speaker,
-            'quoteTime': quote.quoteTime,
-        }
+        quote_json[quote.id] = return_json(quote)
     return quote_json
