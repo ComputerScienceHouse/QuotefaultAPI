@@ -46,31 +46,24 @@ class Quote(db.Model):
 @app.route('/')
 def index():
     db.create_all()
-    quote_json = {}
     quotes = Quote.query.all()  # collect all quote rows in the Quote db
-    for quote in reversed(quotes):
-        quote_json[quote.id] = {
-            'quote': quote.quote,
-            'submitter': quote.submitter,
-            'speaker': quote.speaker,
-            'quoteTime': quote.quoteTime,
-        }
-    return jsonify(quote_json)
+    return jsonify(parse_as_json(quotes))
 
 
 @app.route('/random')
 def random():
-    quote_json = {}
     date = request.args.get('date')
-    submitter = request.args.get('submit')
+    submitter = request.args.get('submitter')
 
     if date is not None:
         quotes = Quote.query.filter_by(quoteTime=date)
+        return jsonify(parse_as_json(quotes))
 
     if submitter is not None:
-        return jsonify({'friday': 'my dudes'})
+        quotes = Quote.query.filter_by(submitter=submitter)
+        return jsonify(parse_as_json(quotes))
 
-    return jsonify({'hello': 'devin'})
+    return jsonify({})
 
 
 @app.route('/newest')
@@ -84,3 +77,16 @@ def newest():
         return jsonify({'friday': 'my dudes'})
 
     return jsonify({'call': 'the police'})
+
+
+def parse_as_json(quotes, quote_json=None):
+    if quote_json is None:
+        quote_json = {}
+    for quote in quotes:
+        quote_json[quote.id] = {
+            'quote': quote.quote,
+            'submitter': quote.submitter,
+            'speaker': quote.speaker,
+            'quoteTime': quote.quoteTime,
+        }
+    return quote_json
