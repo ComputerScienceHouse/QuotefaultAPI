@@ -4,6 +4,7 @@ Quotefault API
 A RESTful API for interacting with CSH Quotefault, no webgui required!
 
 ### Format
+
 ```json
 {
   "533": {
@@ -16,21 +17,27 @@ A RESTful API for interacting with CSH Quotefault, no webgui required!
 ```
 
 ## `<api_key>/all` : `GET`
+
 **Allowed Parameters: `date`, `submitter`**
 
 Example Request: ``
 
 ## `<api_key>/random` : `GET`
+
 **Allowed Parameters: `date`, `submitter`**
 
 Example Request: `/random?submitter=dante`
 
 ## `<api_key>/newest` : `GET`
+
 **Allowed Parameters: `date`, `submitter`**
 
 ### Example Request: `<api_key>/newest?submitter=matted`
+
 #### Output: 
+
 Returns the newest result from the submitter = `matted`
+
 ```json
 {
   "533": {
@@ -43,14 +50,27 @@ Returns the newest result from the submitter = `matted`
 ```
 
 ## `<api_key>/between/<start>/<limit>` : `GET`
+
 **Allowed Parameters: None :cry:**
 
 ## `<api_key>/create` : `PUT`
+
 **Required Parameters: JSON Object**
+
 ```json
 {
     "quote": "This is an example Quote",
     "submitter": "matted",
     "speaker": "Example Speaker"
 }
+```
+
+## `/generatekey/<reason>` : `GET`
+
+Requires a reason as to the use of the API key. A key has a unique owner/reason pair.
+
+#### Output: 
+
+```
+91651at924r55egdfac5
 ```
