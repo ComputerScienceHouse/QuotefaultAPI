@@ -69,42 +69,41 @@ def index():
 
 @app.route('/random')
 def random_quote():
-    quotes = Quote.query.all()  # collect all quote rows in the Quote db
-
     date = request.args.get('date')
     submitter = request.args.get('submitter')
 
+    if date is not None and submitter is not None:
+        quotes = Quote.query.filter_by(quoteTime=date, submitter=submitter).all()
+        random_index = random.randint(0, len(quotes))
+        return jsonify(return_json(quotes[random_index]))
+
+    elif date is not None:
+        quotes = Quote.query.filter_by(quoteTime=date).all()
+        random_index = random.randint(0, len(quotes))
+        return jsonify(return_json(quotes[random_index]))
+
+    elif submitter is not None:
+        quotes = Quote.query.filter_by(submitter=submitter).all()
+        random_index = random.randint(0, len(quotes))
+        return jsonify(return_json(quotes[random_index]))
+
+    quotes = Quote.query.all()
     random_index = random.randint(0, len(quotes))
     return jsonify(return_json(quotes[random_index]))
-
-    # jsonnedQuotes = parse_as_json(quotes)
-    #
-    # if date is not None and submitter is not None:
-    #     quotes = Quote.query.filter_by(quoteTime=date, submitter=submitter)
-    #     return jsonify(parse_as_json(quotes))
-    #
-    # if date is not None:
-    #     quotes = Quote.query.filter_by(quoteTime=date)
-    #     return jsonify(parse_as_json(quotes))
-    #
-    # if submitter is not None:
-    #     quotes = Quote.query.filter_by(submitter=submitter)
-    #     return jsonify(parse_as_json(quotes))
-    #
-    # return jsonify(parse_as_json(quotes))
 
 
 @app.route('/newest')
 def newest():
     date = request.args.get('date')
-    submitter = request.args.get('submit')
+    submitter = request.args.get('submitter')
 
     if date is not None:
-        return jsonify({'cadfad': 'the police'})
-    if submitter is not None:
-        return jsonify({'friday': 'my dudes'})
+        return jsonify(return_json(Quote.query.order_by(Quote.id.desc()).filter_by(date=date).first()))
 
-    return jsonify({'call': 'the police'})
+    elif submitter is not None:
+        return jsonify(return_json(Quote.query.order_by(Quote.id.desc()).filter_by(submitter=submitter).first()))
+
+    return jsonify(return_json(Quote.query.order_by(Quote.id.desc()).first()))
 
 
 def return_json(quote):
