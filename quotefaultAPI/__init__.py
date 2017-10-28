@@ -68,11 +68,12 @@ def index():
 
 @app.route('/random')
 def random():
-    quotes = Quote.query.all()# collect all quote rows in the Quote db
+    quotes = Quote.query.all()  # collect all quote rows in the Quote db
 
     date = request.args.get('date')
     submitter = request.args.get('submitter')
 
+    jsonnedQuotes = parse_as_json(quotes)
 
     if date is not None and submitter is not None:
         quotes = Quote.query.filter_by(quoteTime=date, submitter=submitter)
@@ -89,8 +90,6 @@ def random():
     return jsonify(parse_as_json(quotes))
 
 
-
-
 @app.route('/newest')
 def newest():
     date = request.args.get('date')
@@ -104,14 +103,18 @@ def newest():
     return jsonify({'call': 'the police'})
 
 
+def return_json(quote):
+    return {quote: {
+        'quote': quote.quote,
+        'submitter': quote.submitter,
+        'speaker': quote.speaker,
+        'quoteTime': quote.quoteTime,
+    }}
+
+
 def parse_as_json(quotes, quote_json=None):
     if quote_json is None:
         quote_json = {}
     for quote in quotes:
-        quote_json[quote.id] = {
-            'quote': quote.quote,
-            'submitter': quote.submitter,
-            'speaker': quote.speaker,
-            'quoteTime': quote.quoteTime,
-        }
+        quote_json[quote.id] = return_json(quote)
     return quote_json
