@@ -3,8 +3,9 @@ import os
 import random
 from datetime import datetime
 
+import binascii
 import requests
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, session
 from flask_pyoidc.flask_pyoidc import OIDCAuthentication
 from flask_sqlalchemy import SQLAlchemy
 
@@ -44,6 +45,16 @@ class Quote(db.Model):
         self.speaker = speaker
 
 
+class APIKey(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    hash = db.Column(db.String(64), unique=True)
+    owner = db.Column(db.String(80))
+
+    def __init__(self, owner):
+        self.hash = binascii.b2a_hex(os.urandom(10))
+        self.owner = owner
+
+
 @app.route('/between/<start>/<limit>', methods=['GET'])
 def between(start, limit):
     if datetime.strptime(start, "%Y-%m-%d") < datetime.strptime(limit, "%Y-%m-%d"):
@@ -65,14 +76,13 @@ def create_quote():
         if Quote.query.filter(Quote.quote == quote).first() is not None:
             return "that quote has already been said, asshole"
         elif quote is '' or speaker is '':
-            return "you didn't fill in one of your fields. You literally only had two responsibilities, and somehow"\
+            return "you didn't fill in one of your fields. You literally only had two responsibilities, and somehow" \
                    "you fucked them up."
         else:
             new_quote = Quote(submitter=submitter, quote=quote, speaker=speaker)
             db.session.add(new_quote)
             db.session.flush()
             db.session.commit()
-
 
 
 @app.route('/all', methods=['GET'])
@@ -140,7 +150,11 @@ def newest():
 @auth.oidc_auth
 @app.route('/generatekey')
 def generate_API_key():
-    return "Create a new Key"
+    new_key = APIKey(str(session["userinfo"].get("preferred_username", "")))
+    db.session.add(new_key)
+    db.session.flush()
+    db.session.commit()
+    return new_key.hash
 
 
 def return_json(quote):
