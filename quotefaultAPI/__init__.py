@@ -1,6 +1,7 @@
 import os
 import subprocess
 from datetime import datetime
+import random
 
 import requests
 from flask import Flask, render_template, request, flash, session, make_response, jsonify
@@ -67,27 +68,30 @@ def index():
 
 
 @app.route('/random')
-def random():
+def random_quote():
     quotes = Quote.query.all()  # collect all quote rows in the Quote db
 
     date = request.args.get('date')
     submitter = request.args.get('submitter')
 
-    jsonnedQuotes = parse_as_json(quotes)
+    random_index = random.randint(0, len(quotes))
+    return jsonify(return_json(quotes[random_index]))
 
-    if date is not None and submitter is not None:
-        quotes = Quote.query.filter_by(quoteTime=date, submitter=submitter)
-        return jsonify(parse_as_json(quotes))
-
-    if date is not None:
-        quotes = Quote.query.filter_by(quoteTime=date)
-        return jsonify(parse_as_json(quotes))
-
-    if submitter is not None:
-        quotes = Quote.query.filter_by(submitter=submitter)
-        return jsonify(parse_as_json(quotes))
-
-    return jsonify(parse_as_json(quotes))
+    # jsonnedQuotes = parse_as_json(quotes)
+    #
+    # if date is not None and submitter is not None:
+    #     quotes = Quote.query.filter_by(quoteTime=date, submitter=submitter)
+    #     return jsonify(parse_as_json(quotes))
+    #
+    # if date is not None:
+    #     quotes = Quote.query.filter_by(quoteTime=date)
+    #     return jsonify(parse_as_json(quotes))
+    #
+    # if submitter is not None:
+    #     quotes = Quote.query.filter_by(submitter=submitter)
+    #     return jsonify(parse_as_json(quotes))
+    #
+    # return jsonify(parse_as_json(quotes))
 
 
 @app.route('/newest')
@@ -104,7 +108,7 @@ def newest():
 
 
 def return_json(quote):
-    return {quote: {
+    return {quote.id: {
         'quote': quote.quote,
         'submitter': quote.submitter,
         'speaker': quote.speaker,
