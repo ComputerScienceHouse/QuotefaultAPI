@@ -94,16 +94,14 @@ def random_quote():
 
 @app.route('/newest')
 def newest():
-
-
     date = request.args.get('date')
-    submitter = request.args.get('submit')
+    submitter = request.args.get('submitter')
 
     if date is not None:
-        return jsonify({'cadfad': 'the police'})
-    if submitter is not None:
-        return jsonify({'friday': 'my dudes'})
+        return jsonify(return_json(Quote.query.order_by(Quote.id.desc()).filter_by(date=date).first()))
 
+    elif submitter is not None:
+        return jsonify(return_json(Quote.query.order_by(Quote.id.desc()).filter_by(submitter=submitter).first()))
 
     return jsonify(return_json(Quote.query.order_by(Quote.id.desc()).first()))
 
