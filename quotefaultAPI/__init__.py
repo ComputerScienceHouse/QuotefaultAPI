@@ -1,10 +1,10 @@
+import json
 import os
-import subprocess
-from datetime import datetime
 import random
+from datetime import datetime
 
 import requests
-from flask import Flask, render_template, request, flash, session, make_response, jsonify
+from flask import Flask, request, jsonify
 from flask_pyoidc.flask_pyoidc import OIDCAuthentication
 from flask_sqlalchemy import SQLAlchemy
 
@@ -44,7 +44,7 @@ class Quote(db.Model):
         self.speaker = speaker
 
 
-@app.route('/between/<start>/<limit>')
+@app.route('/between/<start>/<limit>', methods=['GET'])
 def between(start, limit):
     if datetime.strptime(start, "%Y-%m-%d") < datetime.strptime(limit, "%Y-%m-%d"):
         quotes = Quote.query.filter(Quote.quoteTime.between(start, limit)).all()
@@ -53,7 +53,29 @@ def between(start, limit):
     return jsonify(parse_as_json(quotes))
 
 
-@app.route('/all')
+@app.route('/create', methods=['PUT'])
+def create_quote():
+    data = json.loads(request.data.decode('utf-8'))
+
+    if data['quote'] and data['submitter'] and data['speaker']:
+        quote = data['quote']
+        submitter = data['submitter']
+        speaker = data['speaker']
+
+        if Quote.query.filter(Quote.quote == quote).first() is not None:
+            return "that quote has already been said, asshole"
+        elif quote is '' or speaker is '':
+            return "you didn't fill in one of your fields. You literally only had two responsibilities, and somehow"\
+                   "you fucked them up."
+        else:
+            new_quote = Quote(submitter=submitter, quote=quote, speaker=speaker)
+            db.session.add(new_quote)
+            db.session.flush()
+            db.session.commit()
+
+
+
+@app.route('/all', methods=['GET'])
 def index():
     db.create_all()
 
@@ -76,7 +98,7 @@ def index():
     return jsonify(parse_as_json(quotes))
 
 
-@app.route('/random')
+@app.route('/random', methods=['GET'])
 def random_quote():
     date = request.args.get('date')
     submitter = request.args.get('submitter')
@@ -101,7 +123,7 @@ def random_quote():
     return jsonify(return_json(quotes[random_index]))
 
 
-@app.route('/newest')
+@app.route('/newest', methods=['GET'])
 def newest():
     date = request.args.get('date')
     submitter = request.args.get('submitter')
@@ -126,7 +148,7 @@ def return_json(quote):
 
 def parse_as_json(quotes, quote_json=None):
     if quote_json is None:
-        quote_json = {}
+        quote_json = []
     for quote in quotes:
-        quote_json[quote.id] = return_json(quote)
+        quote_json.append(return_json(quote))
     return quote_json
