@@ -74,24 +74,23 @@ def random_quote():
     date = request.args.get('date')
     submitter = request.args.get('submitter')
 
+    if date is not None and submitter is not None:
+        quotes = Quote.query.filter_by(quoteTime=date, submitter=submitter).all()
+        random_index = random.randint(0, len(quotes))
+        return jsonify(return_json(quotes[random_index]))
+
+    elif date is not None:
+        quotes = Quote.query.filter_by(quoteTime=date).all()
+        random_index = random.randint(0, len(quotes))
+        return jsonify(return_json(quotes[random_index]))
+
+    elif submitter is not None:
+        quotes = Quote.query.filter_by(submitter=submitter).all()
+        random_index = random.randint(0, len(quotes))
+        return jsonify(return_json(quotes[random_index]))
+
     random_index = random.randint(0, len(quotes))
     return jsonify(return_json(quotes[random_index]))
-
-    # jsonnedQuotes = parse_as_json(quotes)
-    #
-    # if date is not None and submitter is not None:
-    #     quotes = Quote.query.filter_by(quoteTime=date, submitter=submitter)
-    #     return jsonify(parse_as_json(quotes))
-    #
-    # if date is not None:
-    #     quotes = Quote.query.filter_by(quoteTime=date)
-    #     return jsonify(parse_as_json(quotes))
-    #
-    # if submitter is not None:
-    #     quotes = Quote.query.filter_by(submitter=submitter)
-    #     return jsonify(parse_as_json(quotes))
-    #
-    # return jsonify(parse_as_json(quotes))
 
 
 @app.route('/newest')
