@@ -1,12 +1,19 @@
-from flask import request, url_for
-from flask_api import FlaskAPI, status, exceptions
+from flask import Flask, jsonify
 
-app = FlaskAPI(__name__)
+app = Flask(__name__)
+
 
 @app.route('/')
 def example():
-    return{'hello': 'world'}
+    return jsonify({'hello': 'world'})
+@app.route('/random')
+def random():
+    return jsonify({'hello':'devin'})
+
+@app.route('/newest')
+def newest():
+    return jsonify({'call':'the police'})
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
