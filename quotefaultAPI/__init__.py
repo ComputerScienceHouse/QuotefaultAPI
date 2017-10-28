@@ -43,7 +43,7 @@ class Quote(db.Model):
         self.speaker = speaker
 
 
-@app.route('/')
+@app.route('/all')
 def index():
     db.create_all()
     quotes = Quote.query.all()  # collect all quote rows in the Quote db
@@ -68,7 +68,26 @@ def index():
 
 @app.route('/random')
 def random():
-    pass
+    quotes = Quote.query.all()# collect all quote rows in the Quote db
+
+    date = request.args.get('date')
+    submitter = request.args.get('submitter')
+
+
+    if date is not None and submitter is not None:
+        quotes = Quote.query.filter_by(quoteTime=date, submitter=submitter)
+        return jsonify(parse_as_json(quotes))
+
+    if date is not None:
+        quotes = Quote.query.filter_by(quoteTime=date)
+        return jsonify(parse_as_json(quotes))
+
+    if submitter is not None:
+        quotes = Quote.query.filter_by(submitter=submitter)
+        return jsonify(parse_as_json(quotes))
+
+    return jsonify(parse_as_json(quotes))
+
 
 
 
