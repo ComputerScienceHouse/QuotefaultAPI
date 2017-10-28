@@ -15,20 +15,20 @@ A RESTful API for interacting with CSH Quotefault, no webgui required!
 }
 ```
 
-## `/all`
+## `<api_key>/all` : `GET`
 **Allowed Parameters: `date`, `submitter`**
 
 Example Request: ``
 
-## `/random`
+## `<api_key>/random` : `GET`
 **Allowed Parameters: `date`, `submitter`**
 
 Example Request: `/random?submitter=dante`
 
-## `/newest`
+## `<api_key>/newest` : `GET`
 **Allowed Parameters: `date`, `submitter`**
 
-### Example Request: `/newest?submitter=matted`
+### Example Request: `<api_key>/newest?submitter=matted`
 #### Output: 
 Returns the newest result from the submitter = `matted`
 ```json
@@ -42,5 +42,15 @@ Returns the newest result from the submitter = `matted`
 }
 ```
 
-## `/between/<start>/<limit>`
+## `<api_key>/between/<start>/<limit>` : `GET`
 **Allowed Parameters: None :cry:**
+
+## `<api_key>/create` : `PUT`
+**Required Parameters: JSON Object**
+```json
+{
+    "quote": "This is an example Quote",
+    "submitter": "matted",
+    "speaker": "Example Speaker"
+}
+```
