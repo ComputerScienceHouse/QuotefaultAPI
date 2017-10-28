@@ -7,6 +7,7 @@ from datetime import datetime
 import markdown as markdown
 import requests
 from flask import Flask, request, jsonify, session
+from flask_cors import cross_origin
 from flask_pyoidc.flask_pyoidc import OIDCAuthentication
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import UniqueConstraint
@@ -68,6 +69,7 @@ def index():
 
 
 @app.route('/<api_key>/between/<start>/<limit>', methods=['GET'])
+@cross_origin(headers=['Content-Type'])
 def between(start, limit, api_key):
     if check_key(api_key):
         if datetime.strptime(start, "%Y-%m-%d") < datetime.strptime(limit, "%Y-%m-%d"):
@@ -80,6 +82,7 @@ def between(start, limit, api_key):
 
 
 @app.route('/<api_key>/create', methods=['PUT'])
+@cross_origin(headers=['Content-Type'])
 def create_quote(api_key):
     if check_key(api_key):
         data = json.loads(request.data.decode('utf-8'))
@@ -105,10 +108,9 @@ def create_quote(api_key):
 
 
 @app.route('/<api_key>/all', methods=['GET'])
+@cross_origin(headers=['Content-Type'])
 def all_quotes(api_key):
     if check_key(api_key):
-        db.create_all()
-
         date = request.args.get('date')
         submitter = request.args.get('submitter')
 
@@ -131,6 +133,7 @@ def all_quotes(api_key):
 
 
 @app.route('/<api_key>/random', methods=['GET'])
+@cross_origin(headers=['Content-Type'])
 def random_quote(api_key):
     if check_key(api_key):
         date = request.args.get('date')
@@ -159,6 +162,7 @@ def random_quote(api_key):
 
 
 @app.route('/<api_key>/newest', methods=['GET'])
+@cross_origin(headers=['Content-Type'])
 def newest(api_key):
     if check_key(api_key):
         date = request.args.get('date')
@@ -200,12 +204,12 @@ def get_metadata():
 
 
 def return_json(quote):
-    return {quote.id: {
+    return {
         'quote': quote.quote,
         'submitter': quote.submitter,
         'speaker': quote.speaker,
         'quoteTime': quote.quoteTime,
-    }}
+    }
 
 
 def parse_as_json(quotes, quote_json=None):
