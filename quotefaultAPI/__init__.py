@@ -200,12 +200,12 @@ def get_metadata():
 
 
 def return_json(quote):
-    return {quote.id: {
+    return {
         'quote': quote.quote,
         'submitter': quote.submitter,
         'speaker': quote.speaker,
         'quoteTime': quote.quoteTime,
-    }}
+    }
 
 
 def parse_as_json(quotes, quote_json=None):
