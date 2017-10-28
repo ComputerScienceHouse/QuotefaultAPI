@@ -115,6 +115,12 @@ def newest():
     return jsonify(return_json(Quote.query.order_by(Quote.id.desc()).first()))
 
 
+@auth.oidc_auth
+@app.route('/generatekey')
+def generate_API_key():
+    return "Create a new Key"
+
+
 def return_json(quote):
     return {quote.id: {
         'quote': quote.quote,
