@@ -47,13 +47,13 @@ class Quote(db.Model):
 def index():
     db.create_all()
     quotes = Quote.query.all()  # collect all quote rows in the Quote db
-    return jsonify(parse_as_json(quotes))
 
-
-@app.route('/random')
-def random():
     date = request.args.get('date')
     submitter = request.args.get('submitter')
+
+    if date is not None and submitter is not None:
+        quotes = Quote.query.filter_by(quoteTime=date, submitter=submitter)
+        return jsonify(parse_as_json(quotes))
 
     if date is not None:
         quotes = Quote.query.filter_by(quoteTime=date)
@@ -63,7 +63,13 @@ def random():
         quotes = Quote.query.filter_by(submitter=submitter)
         return jsonify(parse_as_json(quotes))
 
-    return jsonify({})
+    return jsonify(parse_as_json(quotes))
+
+
+@app.route('/random')
+def random():
+    pass
+
 
 
 @app.route('/newest')
