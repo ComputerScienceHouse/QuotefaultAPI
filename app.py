@@ -1,19 +1,7 @@
-from flask import Flask, jsonify
+from quotefaultAPI import app
 
-app = Flask(__name__)
+if __name__ == '__main__':
+    # app.run(host=app.config['IP'], port=app.config['PORT'], debug=True)
+    app.run(debug=True)
 
-
-@app.route('/')
-def example():
-    return jsonify({'hello': 'world'})
-@app.route('/random')
-def random():
-    return jsonify({'hello':'devin'})
-
-@app.route('/newest')
-def newest():
-    return jsonify({'call':'the police'})
-
-
-if __name__ == "__main__":
-    app.run(debug=False)
+application = app
