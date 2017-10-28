@@ -1,10 +1,10 @@
+import json
 import os
-import subprocess
-from datetime import datetime
 import random
+from datetime import datetime
 
 import requests
-from flask import Flask, render_template, request, flash, session, make_response, jsonify
+from flask import Flask, request, jsonify
 from flask_pyoidc.flask_pyoidc import OIDCAuthentication
 from flask_sqlalchemy import SQLAlchemy
 
@@ -51,6 +51,28 @@ def between(start, limit):
         return jsonify(parse_as_json(quotes))
     quotes = Quote.query.all
     return jsonify(parse_as_json(quotes))
+
+
+@app.route('/create', methods=['PUT'])
+def create_quote():
+    data = json.loads(request.data.decode('utf-8'))
+
+    if data['quote'] and data['submitter'] and data['speaker']:
+        quote = data['quote']
+        submitter = data['submitter']
+        speaker = data['speaker']
+
+        if Quote.query.filter(Quote.quote == quote).first() is not None:
+            return "that quote has already been said, asshole"
+        elif quote is '' or speaker is '':
+            return "you didn't fill in one of your fields. You literally only had two responsibilities, and somehow"\
+                   "you fucked them up."
+        else:
+            new_quote = Quote(submitter=submitter, quote=quote, speaker=speaker)
+            db.session.add(new_quote)
+            db.session.flush()
+            db.session.commit()
+
 
 
 @app.route('/all', methods=['GET'])
