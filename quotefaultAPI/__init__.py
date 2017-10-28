@@ -69,8 +69,6 @@ def index():
 
 @app.route('/random')
 def random_quote():
-    quotes = Quote.query.all()  # collect all quote rows in the Quote db
-
     date = request.args.get('date')
     submitter = request.args.get('submitter')
 
@@ -89,12 +87,15 @@ def random_quote():
         random_index = random.randint(0, len(quotes))
         return jsonify(return_json(quotes[random_index]))
 
+    quotes = Quote.query.all()
     random_index = random.randint(0, len(quotes))
     return jsonify(return_json(quotes[random_index]))
 
 
 @app.route('/newest')
 def newest():
+
+
     date = request.args.get('date')
     submitter = request.args.get('submit')
 
@@ -103,7 +104,8 @@ def newest():
     if submitter is not None:
         return jsonify({'friday': 'my dudes'})
 
-    return jsonify({'call': 'the police'})
+
+    return jsonify(return_json(Quote.query.order_by(Quote.id.desc()).first()))
 
 
 def return_json(quote):
