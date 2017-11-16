@@ -89,14 +89,17 @@ def create_quote(api_key):
 
         if data['quote'] and data['speaker']:
             quote = data['quote']
-            submitter = APIKey.query.filter_by(hash=api_key).all()[0].owner
+            if 'submitter' in data:
+                submitter = data['submitter']
+            else:
+                submitter = APIKey.query.filter_by(hash=api_key).all()[0].owner
             speaker = data['speaker']
 
-            if Quote.query.filter(Quote.quote == quote).first() is not None:
-                return "That quote has already been said, asshole", 400
-            elif quote is '' or speaker is '':
+            if quote is '' or speaker is '':
                 return "You didn't fill in one of your fields. You literally only had two responsibilities, " \
                        "and somehow you fucked them up.", 400
+            elif Quote.query.filter(Quote.quote == quote).first() is not None:
+                return "That quote has already been said, asshole", 400
             elif len(quote) > 200:
                 return "Quote is too long! This is no longer a quote, it's a monologue!", 400
             else:
