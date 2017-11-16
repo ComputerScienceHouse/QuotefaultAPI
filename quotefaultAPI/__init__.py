@@ -97,7 +97,7 @@ def create_quote(api_key):
             elif quote is '' or speaker is '':
                 return "You didn't fill in one of your fields. You literally only had two responsibilities, " \
                        "and somehow you fucked them up.", 400
-            elif len(quote) > 280:
+            elif len(quote) > 200:
                 return "Quote is too long! This is no longer a quote, it's a monologue!", 400
             else:
                 new_quote = Quote(submitter=submitter, quote=quote, speaker=speaker)
