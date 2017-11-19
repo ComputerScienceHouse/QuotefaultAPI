@@ -78,7 +78,7 @@ def between(start, limit, api_key):
         quotes = Quote.query.all
         return jsonify(parse_as_json(quotes))
     else:
-        return "Invalid API Key!"
+        return "Invalid API Key!", 403
 
 
 @app.route('/<api_key>/create', methods=['PUT'])
@@ -89,14 +89,19 @@ def create_quote(api_key):
 
         if data['quote'] and data['speaker']:
             quote = data['quote']
-            submitter = APIKey.query.filter_by(hash=api_key).all()[0].owner
+            if 'submitter' in data:
+                submitter = data['submitter']
+            else:
+                submitter = APIKey.query.filter_by(hash=api_key).all()[0].owner
             speaker = data['speaker']
 
-            if Quote.query.filter(Quote.quote == quote).first() is not None:
-                return "that quote has already been said, asshole"
-            elif quote is '' or speaker is '':
-                return "you didn't fill in one of your fields. You literally only had two responsibilities, and somehow" \
-                       "you fucked them up."
+            if quote is '' or speaker is '':
+                return "You didn't fill in one of your fields. You literally only had two responsibilities, " \
+                       "and somehow you fucked them up.", 400
+            elif Quote.query.filter(Quote.quote == quote).first() is not None:
+                return "That quote has already been said, asshole", 400
+            elif len(quote) > 200:
+                return "Quote is too long! This is no longer a quote, it's a monologue!", 400
             else:
                 new_quote = Quote(submitter=submitter, quote=quote, speaker=speaker)
                 db.session.add(new_quote)
@@ -104,7 +109,7 @@ def create_quote(api_key):
                 db.session.commit()
                 return return_json(new_quote)
     else:
-        return "Invalid API Key!"
+        return "Invalid API Key!", 403
 
 
 @app.route('/<api_key>/all', methods=['GET'])
@@ -129,7 +134,7 @@ def all_quotes(api_key):
         quotes = Quote.query.all()  # collect all quote rows in the Quote db
         return jsonify(parse_as_json(quotes))
     else:
-        return "Invalid API Key!"
+        return "Invalid API Key!", 403
 
 
 @app.route('/<api_key>/random', methods=['GET'])
@@ -158,7 +163,7 @@ def random_quote(api_key):
         random_index = random.randint(0, len(quotes))
         return jsonify(return_json(quotes[random_index]))
     else:
-        return "Invalid API Key!"
+        return "Invalid API Key!", 403
 
 
 @app.route('/<api_key>/newest', methods=['GET'])
@@ -176,7 +181,7 @@ def newest(api_key):
 
         return jsonify(return_json(Quote.query.order_by(Quote.id.desc()).first()))
     else:
-        return "Invalid API Key!"
+        return "Invalid API Key!", 403
 
 
 @app.route('/generatekey/<reason>')

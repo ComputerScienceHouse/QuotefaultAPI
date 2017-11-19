@@ -16,23 +16,23 @@ A RESTful API for interacting with CSH Quotefault, no webgui required!
 }
 ```
 
-## `<api_key>/all` : `GET`
+## `/<api_key>/all` : `GET`
 
 **Allowed Parameters: `date`, `submitter`**
 
 Example Request: ``
 
-## `<api_key>/random` : `GET`
+## `/<api_key>/random` : `GET`
 
 **Allowed Parameters: `date`, `submitter`**
 
 Example Request: `/random?submitter=dante`
 
-## `<api_key>/newest` : `GET`
+## `/<api_key>/newest` : `GET`
 
 **Allowed Parameters: `date`, `submitter`**
 
-### Example Request: `<api_key>/newest?submitter=matted`
+### Example Request: `/<api_key>/newest?submitter=matted`
 
 #### Output: 
 
@@ -49,11 +49,15 @@ Returns the newest result from the submitter = `matted`
 }
 ```
 
-## `<api_key>/between/<start>/<limit>` : `GET`
+## `/<api_key>/between/<start>/<limit>` : `GET`
 
 **Allowed Parameters: None :cry:**
+**Required Parameters: `start`, `limit`**
 
-## `<api_key>/create` : `PUT`
+Route produces a list of quotes between the two dates. 
+Requires date string in the format `(MM-DD-YYYY)`
+
+## `/<api_key>/create` : `PUT`
 
 **Required Parameters: JSON Object**
 
