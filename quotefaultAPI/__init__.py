@@ -223,8 +223,8 @@ def newest(api_key: str):
         return "Invalid API Key!", 403
 
 
-@auth.oidc_auth
 @app.route('/generatekey/<reason>')
+@auth.oidc_auth
 def generate_api_key(reason: str):
     """
     Creates an API key for the user requested.
@@ -243,6 +243,12 @@ def generate_api_key(reason: str):
         return new_key.hash
     else:
         return "There's already a key with this reason for this user!"
+
+
+@app.route('/logout')
+@auth.oidc_logout
+def logout():
+    return redirect(url_for('index'), 302)
 
 
 def get_metadata() -> dict:
