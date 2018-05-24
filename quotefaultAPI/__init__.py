@@ -79,9 +79,7 @@ def between(start: str, limit: str, api_key: str):
     :return: Returns a JSON list of quotes between the two dates
     """
     if check_key(api_key):
-		start = str_to_datetime(start)
-		limit = str_to_datetime(limit)
-		return jsonify(parse_as_json(get_quotes_between_dates(start, limit, request.args.submitter)))
+		return jsonify(parse_as_json(query_builder(start, limit, request.args.get('submitter').all()))
     else:
         return "Invalid API Key!", 403
 
@@ -136,16 +134,7 @@ def all_quotes(api_key: str):
 	if check_key(api_key):
 		date = request.args.get('date')
 		submitter = request.args.get('submitter')
-		quotes = []
-
-		if date is not None:
-			quotes = get_quotes_on_date(str_to_datetime(date), submitter)
-		elif submitter is not None:
-			quotes = Quote.query.filter_by(submitter=submitter).all()
-		else:
-			qutoes = Quote.query.all()
-        
-		return jsonify(return_json(quotes))
+		return jsonify(parse_as_json(query_builder(date, None, submitter).all()))
 	else:
 		return "Invalid API Key!", 403
 
@@ -161,15 +150,7 @@ def random_quote(api_key: str):
     if check_key(api_key):
         date = request.args.get('date')
         submitter = request.args.get('submitter')
-		quotes = []
-
-		if date is not None:
-			quotes = get_quotes_on_date(str_to_datetime(date), submitter)
-		elif submitter is not None:
-			quotes = Quote.query.filter_by(submitter=submitter).all()
-		else:
-			qutoes = Quote.query.all()
-		
+		quotes = query_builder(date, None, submitter).all()
 		random_index = random.randint(0, len(quotes))
         return jsonify(return_json(quotes[random_index]))
     else:
@@ -187,21 +168,7 @@ def newest(api_key: str):
     if check_key(api_key):
 		date = request.args.get('date')
         submitter = request.args.get('submitter')
-
-		if date is not None:
-			start_date = str_to_datetime(date)
-			end_date = start_date + timedelta(1)
-
-		if date is not None and submitter is not None:
-			return jsonify(return_json(Quote.query.order_by(Quote.id.desc()).filter(Quote.quoteTime.between(start_date, end_date)).filter_by(submitter=submitter).first()))
-        # Returns the newest quote given a datetime stamp from the query
-        elif date is not None:
-            return jsonify(return_json(Quote.query.order_by(Quote.id.desc()).filter(Quote.quoteTime.between(start_date, end_date)).first()))
-        # Returns the newest quote given a submitter from the query
-        elif submitter is not None:
-            return jsonify(return_json(Quote.query.order_by(Quote.id.desc()).filter_by(submitter=submitter).first()))
-        # Returns the newest quote overall from the query
-        return jsonify(return_json(Quote.query.order_by(Quote.id.desc()).first()))
+		return jsonify(parse_as_json(query_builder(date, None, submitter).order_by(Quote.id.desc()).first()))
     else:
         return "Invalid API Key!", 403
 
@@ -287,6 +254,7 @@ def check_key_unique(owner: str, reason: str) -> bool:
     if len(keys) > 0:
         return True
 
+
 def str_to_datetime(date:str) -> datetime:
 	"""
 	Converts a string in the format mm-dd-yyyy to a datetime object
@@ -295,29 +263,20 @@ def str_to_datetime(date:str) -> datetime:
 	"""
 	return datetime.strptime(date, "%m-%d-%Y")
 
-def get_quotes_on_date(day: datetime, submitter: str) -> list:
-	"""
-	Queries the database and returns the list of quotes on the given day with the given submitter.
-	:param day: the day to search on
-	:param submitter: (optional) the CSH username of the submitter
-	:return: the list of quote objects made on day by submitter
-	"""
-	start = day.replace(hour=0, minute=0, second=0);
-	end = start + timedelta(1)
-	return get_quotes_between_dates(start, end, submitter)
 
-def get_quotes_between_dates(start: datetime, end: datetime, submitter: str) -> list:
-	"""
-	Queries the database and returns the set of quotes matching the conditions.
-	:param start: The datetime.date for the left bound of the interval
-	:param end: The datetime.date for the right bound of the interval
-	:param submitter: (Optional) the CSH username of the submitter
-	:return: Returns a list of Quote Objects matching the filter conditions
-	"""
-	if end < start:
-		start, end = end, start
-	quotes = Quote.query.filter(Quote.quoteTime.between(start, end)).all()
-	if submitter is None:
-		return quotes
-	else:
-		return [q for q in quotes if q.submitter == submitter]
+def query_builder(start: str, end: str, submitter: str) -> flask_sqlalchemy.BaseQuery:
+	# TODO Doc
+	query = Quote.query
+
+	if start is not None:
+		start = str_to_datetime(start)
+		if end is not None:
+			end = str_to_datetime(end)
+		else:
+			end = start + timedelta(1)
+		query = query.filter(Quote.quoteTime.between(start, end))
+	
+	if submitter is not None:
+		query = query.filter_by(submitter=submitter)
+	
+	return query
