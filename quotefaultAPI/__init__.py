@@ -185,12 +185,18 @@ def newest(api_key: str):
     :return: Returns the newest quote found during the query
     """
     if check_key(api_key):
-        date = request.args.get('date')
+		date = request.args.get('date')
         submitter = request.args.get('submitter')
 
+		if date is not None:
+			start_date = str_to_datetime(date)
+			end_date = start_date + timedelta(1)
+
+		if date is not None and submitter is not None:
+			return jsonify(return_json(Quote.query.order_by(Quote.id.desc()).filter(Quote.quoteTime.between(start_date, end_date)).filter_by(submitter=submitter).first()))
         # Returns the newest quote given a datetime stamp from the query
-        if date is not None:
-            return jsonify(return_json(Quote.query.order_by(Quote.id.desc()).filter_by(date=date).first()))
+        elif date is not None:
+            return jsonify(return_json(Quote.query.order_by(Quote.id.desc()).filter(Quote.quoteTime.between(start_date, end_date)).first()))
         # Returns the newest quote given a submitter from the query
         elif submitter is not None:
             return jsonify(return_json(Quote.query.order_by(Quote.id.desc()).filter_by(submitter=submitter).first()))
