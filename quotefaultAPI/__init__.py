@@ -2,7 +2,7 @@ import binascii
 import json
 import os
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import markdown as markdown
 import requests
@@ -79,11 +79,9 @@ def between(start: str, limit: str, api_key: str):
     :return: Returns a JSON list of quotes between the two dates
     """
     if check_key(api_key):
-        if datetime.strptime(start, "%Y-%m-%d") < datetime.strptime(limit, "%Y-%m-%d"):
-            quotes = Quote.query.filter(Quote.quoteTime.between(start, limit)).all()
-            return jsonify(parse_as_json(quotes))
-        quotes = Quote.query.all
-        return jsonify(parse_as_json(quotes))
+		start = datetime.strptime(start, "%m-%d-%Y")
+		limit = datetime.strptime(limit, "%m-%d-%Y")
+		return jsonify(parse_as_json(get_quotes_between_dates(start, limit, request.args.submitter)))
     else:
         return "Invalid API Key!", 403
 
@@ -303,3 +301,25 @@ def check_key_unique(owner: str, reason: str) -> bool:
     keys = APIKey.query.filter_by(owner=owner, reason=reason).all()
     if len(keys) > 0:
         return True
+
+def get_quotes_on_date(day: datetime, submitter: str) -> list:
+	# TODO Document
+	start = day.replace(hour=0, minute=0, second=0);
+	end = start + timedelta(1)
+	return get_quotes_between_dates(start, end, submitter)
+
+def get_quotes_between_dates(start: datetime, end: datetime, submitter: str) -> list:
+	"""
+	Queries the database and returns the set of quotes matching the conditions.
+	:param start: The datetime.date for the left bound of the interval
+	:param end: The datetime.date for the right bound of the interval
+	:param submitter: (Optional) the CSH username of the submitter
+	:return: Returns a list of Quote Objects matching the filter conditions
+	"""
+	if end < start:
+		start, end = end, start
+	quotes = Quote.query.filter(Quote.quoteTime.between(start, end)).all()
+	if submitter is None:
+		return quotes
+	else:
+		return [q for q in quotes if q.submitter == submitter]
