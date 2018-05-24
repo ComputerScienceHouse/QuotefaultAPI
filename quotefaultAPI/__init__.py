@@ -133,30 +133,21 @@ def all_quotes(api_key: str):
     :param api_key: API key allowing for the use of the API
     :return: Returns JSON of all quotes in the Quotefault database
     """
-    if check_key(api_key):
-        date = request.args.get('date')
-        submitter = request.args.get('submitter')
+	if check_key(api_key):
+		date = request.args.get('date')
+		submitter = request.args.get('submitter')
+		quotes = []
 
-        if date is not None and submitter is not None:
-            # Returns all quotes from the query given a submitter and datetime
-            quotes = Quote.query.filter_by(quoteTime=date, submitter=submitter).all()
-            return jsonify(parse_as_json(quotes))
-
-        elif date is not None:
-            # Returns all quotes from the query given a datetime
-            quotes = Quote.query.filter_by(quoteTime=date).all()
-            return jsonify(parse_as_json(quotes))
-
-        elif submitter is not None:
-            # Returns all quotes from the query given a submitter
-            quotes = Quote.query.filter_by(submitter=submitter)
-            return jsonify(parse_as_json(quotes))
-        else:
-            # collect all quote rows in the Quote db
-            quotes = Quote.query.all()
-            return jsonify(parse_as_json(quotes))
-    else:
-        return "Invalid API Key!", 403
+		if date is not None:
+			quotes = get_quotes_on_date(str_to_datetime(date), submitter)
+		elif submitter is not None:
+			quotes = Quote.query.filter_by(submitter=submitter).all()
+		else:
+			qutoes = Quote.query.all()
+        
+		return jsonify(return_json(quotes))
+	else:
+		return "Invalid API Key!", 403
 
 
 @app.route('/<api_key>/random', methods=['GET'])
