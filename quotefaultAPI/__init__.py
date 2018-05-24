@@ -291,11 +291,20 @@ def check_key_unique(owner: str, reason: str) -> bool:
         return True
 
 def str_to_datetime(date:str) -> datetime:
-	# TODO Document
+	"""
+	Converts a string in the format mm-dd-yyyy to a datetime object
+	:param date: the date string
+	:return: a datetime object equivalent to the date string
+	"""
 	return datetime.strptime(date, "%m-%d-%Y")
 
 def get_quotes_on_date(day: datetime, submitter: str) -> list:
-	# TODO Document
+	"""
+	Queries the database and returns the list of quotes on the given day with the given submitter.
+	:param day: the day to search on
+	:param submitter: (optional) the CSH username of the submitter
+	:return: the list of quote objects made on day by submitter
+	"""
 	start = day.replace(hour=0, minute=0, second=0);
 	end = start + timedelta(1)
 	return get_quotes_between_dates(start, end, submitter)
