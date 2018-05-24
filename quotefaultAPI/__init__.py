@@ -79,8 +79,8 @@ def between(start: str, limit: str, api_key: str):
     :return: Returns a JSON list of quotes between the two dates
     """
     if check_key(api_key):
-		start = datetime.strptime(start, "%m-%d-%Y")
-		limit = datetime.strptime(limit, "%m-%d-%Y")
+		start = str_to_datetime(start)
+		limit = str_to_datetime(limit)
 		return jsonify(parse_as_json(get_quotes_between_dates(start, limit, request.args.submitter)))
     else:
         return "Invalid API Key!", 403
@@ -170,29 +170,17 @@ def random_quote(api_key: str):
     if check_key(api_key):
         date = request.args.get('date')
         submitter = request.args.get('submitter')
+		quotes = []
 
-        if date is not None and submitter is not None:
-            # Returns a random quote from the query given a submitter and datetime
-            quotes = Quote.query.filter_by(quoteTime=date, submitter=submitter).all()
-            random_index = random.randint(0, len(quotes))
-            return jsonify(return_json(quotes[random_index]))
-
-        elif date is not None:
-            # Returns a random quote from the query given a datetime
-            quotes = Quote.query.filter_by(quoteTime=date).all()
-            random_index = random.randint(0, len(quotes))
-            return jsonify(return_json(quotes[random_index]))
-
-        elif submitter is not None:
-            # Returns a random quote from the query given a submitter
-            quotes = Quote.query.filter_by(submitter=submitter).all()
-            random_index = random.randint(0, len(quotes))
-            return jsonify(return_json(quotes[random_index]))
-        else:
-            # Returns a random quote from the query
-            quotes = Quote.query.all()
-            random_index = random.randint(0, len(quotes))
-            return jsonify(return_json(quotes[random_index]))
+		if date is not None:
+			quotes = get_quotes_on_date(str_to_datetime(date), submitter)
+		elif submitter is not None:
+			quotes = Quote.query.filter_by(submitter=submitter).all()
+		else:
+			qutoes = Quote.query.all()
+		
+		random_index = random.randint(0, len(quotes))
+        return jsonify(return_json(quotes[random_index]))
     else:
         return "Invalid API Key!", 403
 
@@ -301,6 +289,10 @@ def check_key_unique(owner: str, reason: str) -> bool:
     keys = APIKey.query.filter_by(owner=owner, reason=reason).all()
     if len(keys) > 0:
         return True
+
+def str_to_datetime(date:str) -> datetime:
+	# TODO Document
+	return datetime.strptime(date, "%m-%d-%Y")
 
 def get_quotes_on_date(day: datetime, submitter: str) -> list:
 	# TODO Document
