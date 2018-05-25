@@ -268,7 +268,7 @@ def str_to_datetime(date:str) -> datetime:
     return datetime.strptime(date, "%m-%d-%Y")
 
 
-def query_builder(start: str, end: str, submitter: str) -> flask_sqlalchemy.BaseQuery:
+def query_builder(start: str, end: str, submitter: str):
     """
     Builds a sqlalchemy query.
     :param start: (optional, unless end provided) The date string for the start of the desired range.
