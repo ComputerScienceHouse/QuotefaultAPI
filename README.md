@@ -16,6 +16,9 @@ A RESTful API for interacting with CSH Quotefault, no webgui required!
 }
 ```
 
+All `date` paramaters use the format `mm-dd-yyyy`.
+
+
 ## `/<api_key>/all` : `GET`
 
 **Allowed Parameters: `date`, `submitter`**
@@ -51,11 +54,10 @@ Returns the newest result from the submitter = `matted`
 
 ## `/<api_key>/between/<start>/<limit>` : `GET`
 
-**Allowed Parameters: None :cry:**
+**Allowed Parameters: `submitter`**
 **Required Parameters: `start`, `limit`**
 
 Route produces a list of quotes between the two dates. 
-Requires date string in the format `(MM-DD-YYYY)`
 
 ## `/<api_key>/create` : `PUT`
 

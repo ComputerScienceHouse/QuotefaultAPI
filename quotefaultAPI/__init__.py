@@ -2,7 +2,7 @@ import binascii
 import json
 import os
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import markdown as markdown
 import requests
@@ -79,11 +79,9 @@ def between(start: str, limit: str, api_key: str):
     :return: Returns a JSON list of quotes between the two dates
     """
     if check_key(api_key):
-        if datetime.strptime(start, "%Y-%m-%d") < datetime.strptime(limit, "%Y-%m-%d"):
-            quotes = Quote.query.filter(Quote.quoteTime.between(start, limit)).all()
-            return jsonify(parse_as_json(quotes))
-        quotes = Quote.query.all
-        return jsonify(parse_as_json(quotes))
+        submitter = request.args.get('submitter')
+        query = query_builder(start, limit, submitter)
+        return parse_as_json(query.all())
     else:
         return "Invalid API Key!", 403
 
@@ -138,25 +136,8 @@ def all_quotes(api_key: str):
     if check_key(api_key):
         date = request.args.get('date')
         submitter = request.args.get('submitter')
-
-        if date is not None and submitter is not None:
-            # Returns all quotes from the query given a submitter and datetime
-            quotes = Quote.query.filter_by(quoteTime=date, submitter=submitter).all()
-            return jsonify(parse_as_json(quotes))
-
-        elif date is not None:
-            # Returns all quotes from the query given a datetime
-            quotes = Quote.query.filter_by(quoteTime=date).all()
-            return jsonify(parse_as_json(quotes))
-
-        elif submitter is not None:
-            # Returns all quotes from the query given a submitter
-            quotes = Quote.query.filter_by(submitter=submitter)
-            return jsonify(parse_as_json(quotes))
-        else:
-            # collect all quote rows in the Quote db
-            quotes = Quote.query.all()
-            return jsonify(parse_as_json(quotes))
+        query = query_builder(date, None, submitter)
+        return parse_as_json(query.all())
     else:
         return "Invalid API Key!", 403
 
@@ -172,29 +153,9 @@ def random_quote(api_key: str):
     if check_key(api_key):
         date = request.args.get('date')
         submitter = request.args.get('submitter')
-
-        if date is not None and submitter is not None:
-            # Returns a random quote from the query given a submitter and datetime
-            quotes = Quote.query.filter_by(quoteTime=date, submitter=submitter).all()
-            random_index = random.randint(0, len(quotes))
-            return jsonify(return_json(quotes[random_index]))
-
-        elif date is not None:
-            # Returns a random quote from the query given a datetime
-            quotes = Quote.query.filter_by(quoteTime=date).all()
-            random_index = random.randint(0, len(quotes))
-            return jsonify(return_json(quotes[random_index]))
-
-        elif submitter is not None:
-            # Returns a random quote from the query given a submitter
-            quotes = Quote.query.filter_by(submitter=submitter).all()
-            random_index = random.randint(0, len(quotes))
-            return jsonify(return_json(quotes[random_index]))
-        else:
-            # Returns a random quote from the query
-            quotes = Quote.query.all()
-            random_index = random.randint(0, len(quotes))
-            return jsonify(return_json(quotes[random_index]))
+        quotes = query_builder(date, None, submitter).all()
+        random_index = random.randint(0, len(quotes))
+        return jsonify(return_json(quotes[random_index]))
     else:
         return "Invalid API Key!", 403
 
@@ -210,15 +171,8 @@ def newest(api_key: str):
     if check_key(api_key):
         date = request.args.get('date')
         submitter = request.args.get('submitter')
-
-        # Returns the newest quote given a datetime stamp from the query
-        if date is not None:
-            return jsonify(return_json(Quote.query.order_by(Quote.id.desc()).filter_by(date=date).first()))
-        # Returns the newest quote given a submitter from the query
-        elif submitter is not None:
-            return jsonify(return_json(Quote.query.order_by(Quote.id.desc()).filter_by(submitter=submitter).first()))
-        # Returns the newest quote overall from the query
-        return jsonify(return_json(Quote.query.order_by(Quote.id.desc()).first()))
+        query = query_builder(date, None, submitter).order_by(Quote.id.desc())
+        return parse_as_json(query.first())
     else:
         return "Invalid API Key!", 403
 
@@ -290,7 +244,7 @@ def parse_as_json(quotes: list, quote_json=None) -> list:
         quote_json = []
     for quote in quotes:
         quote_json.append(return_json(quote))
-    return quote_json
+    return jsonify(quote_json)
 
 
 def check_key(api_key: str) -> bool:
@@ -303,3 +257,38 @@ def check_key_unique(owner: str, reason: str) -> bool:
     keys = APIKey.query.filter_by(owner=owner, reason=reason).all()
     if len(keys) > 0:
         return True
+
+
+def str_to_datetime(date:str) -> datetime:
+    """
+    Converts a string in the format mm-dd-yyyy to a datetime object
+    :param date: the date string
+    :return: a datetime object equivalent to the date string
+    """
+    return datetime.strptime(date, "%m-%d-%Y")
+
+
+def query_builder(start: str, end: str, submitter: str) -> flask_sqlalchemy.BaseQuery:
+    """
+    Builds a sqlalchemy query.
+    :param start: (optional, unless end provided) The date string for the start of the desired range.
+    If end is not provided, start specifies a single day's fiter
+    :param end: (optional) The date string for the end of the desired range.
+    :param submitter: (optional) The CSH username of the submitter to search for.
+    :return: The query as defined by the given parameters
+    """
+    query = Quote.query
+
+    if start is not None:
+        start = str_to_datetime(start)
+        if end is not None:
+            end = str_to_datetime(end)
+        else:
+            end = start + timedelta(1)
+        query = query.filter(Quote.quoteTime.between(start, end))
+    
+    if submitter is not None:
+        query = query.filter_by(submitter=submitter)
+    
+    return query
+
