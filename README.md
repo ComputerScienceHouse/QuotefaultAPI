@@ -23,19 +23,19 @@ If no quotes are found, all routes return 'none'.
 
 ## `/<api_key>/all` : `GET`
 
-**Allowed Parameters: `date`, `submitter`**
+**Allowed Parameters: `date`, `submitter`, `speaker`**
 
 Example Request: ``
 
 ## `/<api_key>/random` : `GET`
 
-**Allowed Parameters: `date`, `submitter`**
+**Allowed Parameters: `date`, `submitter`, `speaker`**
 
 Example Request: `/random?submitter=dante`
 
 ## `/<api_key>/newest` : `GET`
 
-**Allowed Parameters: `date`, `submitter`**
+**Allowed Parameters: `date`, `submitter`, `speaker`**
 
 ### Example Request: `/<api_key>/newest?submitter=matted`
 
@@ -56,7 +56,7 @@ Returns the newest result from the submitter = `matted`
 
 ## `/<api_key>/between/<start>/<limit>` : `GET`
 
-**Allowed Parameters: `submitter`**
+**Allowed Parameters: `submitter`, `speaker`**
 **Required Parameters: `start`, `limit`**
 
 Route produces a list of quotes between the two dates. 
