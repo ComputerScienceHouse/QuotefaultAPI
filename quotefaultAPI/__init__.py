@@ -80,7 +80,8 @@ def between(start: str, limit: str, api_key: str):
     """
     if check_key(api_key):
         submitter = request.args.get('submitter')
-        query = query_builder(start, limit, submitter)
+        speaker = request.args.get('speaker')
+        query = query_builder(start, limit, submitter, speaker)
         if len(query.all()) == 0:
             return "none"
         return parse_as_json(query.all())
@@ -138,7 +139,8 @@ def all_quotes(api_key: str):
     if check_key(api_key):
         date = request.args.get('date')
         submitter = request.args.get('submitter')
-        query = query_builder(date, None, submitter)
+        speaker = request.args.get('speaker')
+        query = query_builder(date, None, submitter, speaker)
         if len(query.all()) == 0:
             return "none"
         return parse_as_json(query.all())
@@ -157,7 +159,8 @@ def random_quote(api_key: str):
     if check_key(api_key):
         date = request.args.get('date')
         submitter = request.args.get('submitter')
-        quotes = query_builder(date, None, submitter).all()
+        speaker = request.args.get('speaker')
+        quotes = query_builder(date, None, submitter, speaker).all()
         if len(quotes) == 0:
             return "none"
         random_index = random.randint(0, len(quotes))
@@ -177,7 +180,8 @@ def newest(api_key: str):
     if check_key(api_key):
         date = request.args.get('date')
         submitter = request.args.get('submitter')
-        query = query_builder(date, None, submitter).order_by(Quote.id.desc())
+        speaker = request.args.get('speaker')
+        query = query_builder(date, None, submitter, speaker).order_by(Quote.id.desc())
         if len(query.all()) == 0:
             return "none"
         return jsonify(return_json(query.first()))
@@ -276,7 +280,7 @@ def str_to_datetime(date:str) -> datetime:
     return datetime.strptime(date, "%m-%d-%Y")
 
 
-def query_builder(start: str, end: str, submitter: str):
+def query_builder(start: str, end: str, submitter: str, speaker: str):
     """
     Builds a sqlalchemy query.
     :param start: (optional, unless end provided) The date string for the start of the desired range.
@@ -297,6 +301,9 @@ def query_builder(start: str, end: str, submitter: str):
     
     if submitter is not None:
         query = query.filter_by(submitter=submitter)
+
+    if speaker is not None:
+        query = query.filter_by(speaker=speaker)
     
     return query
 
