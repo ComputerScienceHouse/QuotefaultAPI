@@ -180,7 +180,7 @@ def newest(api_key: str):
         query = query_builder(date, None, submitter).order_by(Quote.id.desc())
         if len(query.all()) == 0:
             return "none"
-        return parse_as_json(query.first())
+        return jsonify(return_json(query.first()))
     else:
         return "Invalid API Key!", 403
 
