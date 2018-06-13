@@ -18,6 +18,8 @@ A RESTful API for interacting with CSH Quotefault, no webgui required!
 
 All `date` paramaters use the format `mm-dd-yyyy`.
 
+If no quotes are found, all routes return 'none'.
+
 
 ## `/<api_key>/all` : `GET`
 
