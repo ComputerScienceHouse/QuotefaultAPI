@@ -81,6 +81,8 @@ def between(start: str, limit: str, api_key: str):
     if check_key(api_key):
         submitter = request.args.get('submitter')
         query = query_builder(start, limit, submitter)
+        if len(query.all()) == 0:
+            return "none"
         return parse_as_json(query.all())
     else:
         return "Invalid API Key!", 403
@@ -137,6 +139,8 @@ def all_quotes(api_key: str):
         date = request.args.get('date')
         submitter = request.args.get('submitter')
         query = query_builder(date, None, submitter)
+        if len(query.all()) == 0:
+            return "none"
         return parse_as_json(query.all())
     else:
         return "Invalid API Key!", 403
@@ -154,6 +158,8 @@ def random_quote(api_key: str):
         date = request.args.get('date')
         submitter = request.args.get('submitter')
         quotes = query_builder(date, None, submitter).all()
+        if len(quotes) == 0:
+            return "none"
         random_index = random.randint(0, len(quotes))
         return jsonify(return_json(quotes[random_index]))
     else:
@@ -172,6 +178,8 @@ def newest(api_key: str):
         date = request.args.get('date')
         submitter = request.args.get('submitter')
         query = query_builder(date, None, submitter).order_by(Quote.id.desc())
+        if len(query.all()) == 0:
+            return "none"
         return jsonify(return_json(query.first()))
     else:
         return "Invalid API Key!", 403
