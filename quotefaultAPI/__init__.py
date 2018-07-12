@@ -70,123 +70,108 @@ def index():
 
 @app.route('/<api_key>/between/<start>/<limit>', methods=['GET'])
 @cross_origin(headers=['Content-Type'])
-def between(start: str, limit: str, api_key: str):
+@check_key(api_key)
+def between(start: str, limit: str):
     """
     Shows all quotes submitted between two dates
     :param start: Start date string
     :param limit: End date string
-    :param api_key: API key allowing for the use of the API
     :return: Returns a JSON list of quotes between the two dates
     """
-    if check_key(api_key):
-        submitter = request.args.get('submitter')
-        speaker = request.args.get('speaker')
-        query = query_builder(start, limit, submitter, speaker)
-        if len(query.all()) == 0:
-            return "none"
-        return parse_as_json(query.all())
-    else:
-        return "Invalid API Key!", 403
+    submitter = request.args.get('submitter')
+    speaker = request.args.get('speaker')
+    query = query_builder(start, limit, submitter, speaker)
+    if len(query.all()) == 0:
+        return "none"
+    return parse_as_json(query.all())
 
 
 @app.route('/<api_key>/create', methods=['PUT'])
 @cross_origin(headers=['Content-Type'])
+@check_key(api_key)
 def create_quote(api_key: str):
     """
     Put request to create a new Quote
-    :param api_key: API key allowing for the use of the API
     :return: The new Quote object that was created by the request
     """
-    if check_key(api_key):
-        # Gets the body of the request and recieves it as JSON
-        data = json.loads(request.data.decode('utf-8'))
+    # Gets the body of the request and recieves it as JSON
+    data = json.loads(request.data.decode('utf-8'))
 
-        if data['quote'] and data['speaker']:
-            quote = data['quote']
-            if 'submitter' in data:
-                submitter = data['submitter']
-            else:
-                submitter = APIKey.query.filter_by(hash=api_key).all()[0].owner
-            speaker = data['speaker']
+    if data['quote'] and data['speaker']:
+        quote = data['quote']
+        if 'submitter' in data:
+            submitter = data['submitter']
+        else:
+            submitter = APIKey.query.filter_by(hash=api_key).all()[0].owner
+        speaker = data['speaker']
 
-            if quote is '' or speaker is '':
-                return "You didn't fill in one of your fields. You literally only had two responsibilities, " \
-                       "and somehow you fucked them up.", 400
-            elif Quote.query.filter(Quote.quote == quote).first() is not None:
-                return "That quote has already been said, asshole", 400
-            elif len(quote) > 200:
-                return "Quote is too long! This is no longer a quote, it's a monologue!", 400
-            else:
-                # Creates a new quote given the data from the body of the request
-                new_quote = Quote(submitter=submitter, quote=quote, speaker=speaker)
-                db.session.add(new_quote)
-                db.session.flush()
-                db.session.commit()
-                # Returns the json of the quote
-                return jsonify(return_json(new_quote))
-    else:
-        return "Invalid API Key!", 403
+        if quote is '' or speaker is '':
+            return "You didn't fill in one of your fields. You literally only had two responsibilities, " \
+                   "and somehow you fucked them up.", 400
+        elif Quote.query.filter(Quote.quote == quote).first() is not None:
+            return "That quote has already been said, asshole", 400
+        elif len(quote) > 200:
+            return "Quote is too long! This is no longer a quote, it's a monologue!", 400
+        else:
+            # Creates a new quote given the data from the body of the request
+            new_quote = Quote(submitter=submitter, quote=quote, speaker=speaker)
+            db.session.add(new_quote)
+            db.session.flush()
+            db.session.commit()
+            # Returns the json of the quote
+            return jsonify(return_json(new_quote))
 
 
 @app.route('/<api_key>/all', methods=['GET'])
 @cross_origin(headers=['Content-Type'])
-def all_quotes(api_key: str):
+@check_key(api_key)
+def all_quotes():
     """
     Returns all Quotes in the database
-    :param api_key: API key allowing for the use of the API
     :return: Returns JSON of all quotes in the Quotefault database
     """
-    if check_key(api_key):
-        date = request.args.get('date')
-        submitter = request.args.get('submitter')
-        speaker = request.args.get('speaker')
-        query = query_builder(date, None, submitter, speaker)
-        if len(query.all()) == 0:
-            return "none"
-        return parse_as_json(query.all())
-    else:
-        return "Invalid API Key!", 403
+    date = request.args.get('date')
+    submitter = request.args.get('submitter')
+    speaker = request.args.get('speaker')
+    query = query_builder(date, None, submitter, speaker)
+    if len(query.all()) == 0:
+        return "none"
+    return parse_as_json(query.all())
 
 
 @app.route('/<api_key>/random', methods=['GET'])
 @cross_origin(headers=['Content-Type'])
-def random_quote(api_key: str):
+@check_key(api_key)
+def random_quote():
     """
     Returns a random quote from the database
-    :param api_key: API key allowing for the use of the API
     :return: Returns a random quote
     """
-    if check_key(api_key):
-        date = request.args.get('date')
-        submitter = request.args.get('submitter')
-        speaker = request.args.get('speaker')
-        quotes = query_builder(date, None, submitter, speaker).all()
-        if len(quotes) == 0:
-            return "none"
-        random_index = random.randint(0, len(quotes))
-        return jsonify(return_json(quotes[random_index]))
-    else:
-        return "Invalid API Key!", 403
+    date = request.args.get('date')
+    submitter = request.args.get('submitter')
+    speaker = request.args.get('speaker')
+    quotes = query_builder(date, None, submitter, speaker).all()
+    if len(quotes) == 0:
+        return "none"
+    random_index = random.randint(0, len(quotes))
+    return jsonify(return_json(quotes[random_index]))
 
 
 @app.route('/<api_key>/newest', methods=['GET'])
 @cross_origin(headers=['Content-Type'])
-def newest(api_key: str):
+@check_key(api_key)
+def newest():
     """
     Queries the database for the newest quote, with optional parameters to define submitter or datetime stamp
-    :param api_key: API key allowing for the use of the API
     :return: Returns the newest quote found during the query
     """
-    if check_key(api_key):
-        date = request.args.get('date')
-        submitter = request.args.get('submitter')
-        speaker = request.args.get('speaker')
-        query = query_builder(date, None, submitter, speaker).order_by(Quote.id.desc())
-        if len(query.all()) == 0:
-            return "none"
-        return jsonify(return_json(query.first()))
-    else:
-        return "Invalid API Key!", 403
+    date = request.args.get('date')
+    submitter = request.args.get('submitter')
+    speaker = request.args.get('speaker')
+    query = query_builder(date, None, submitter, speaker).order_by(Quote.id.desc())
+    if len(query.all()) == 0:
+        return "none"
+    return jsonify(return_json(query.first()))
 
 
 @app.route('/generatekey/<reason>')
@@ -259,10 +244,16 @@ def parse_as_json(quotes: list, quote_json=None) -> list:
     return jsonify(quote_json)
 
 
-def check_key(api_key: str) -> bool:
-    keys = APIKey.query.filter_by(hash=api_key).all()
-    if len(keys) > 0:
-        return True
+def check_key(api_key: str)
+    def decorator(func):
+        def wrapper():
+            keys = APIKey.query.filter_by(hash=api_key).all()
+            if len(keys) > 0:
+                return func()
+            else:
+                return "Invalid API Key!", 403
+        return wrapper
+    return decorator
 
 
 def check_key_unique(owner: str, reason: str) -> bool:
