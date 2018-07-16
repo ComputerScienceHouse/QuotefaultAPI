@@ -259,7 +259,7 @@ def parse_as_json(quotes: list, quote_json=None) -> list:
     return jsonify(quote_json)
 
 
-def check_key(api_key: str)
+def check_key(api_key: str):
     def decorator(func):
         def wrapper():
             keys = APIKey.query.filter_by(hash=api_key).all()
