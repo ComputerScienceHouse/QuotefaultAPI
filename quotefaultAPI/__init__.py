@@ -174,6 +174,20 @@ def newest():
     return jsonify(return_json(query.first()))
 
 
+@app.route('/<api_key>/<qid>', methods=['GET'])
+@cross_origin(headers=['Content-Type'])
+@check_key(api_key)
+def quote_id():
+    """
+    Queries the database for the specified quote.
+    :return: Returns the specified quote if exists, else 'none'
+    """
+    query = query_builder(id_num = qid)
+    if len(query.all()) == 0:
+        return "none"
+    return jsonify(return_json(query.first()))
+
+
 @app.route('/generatekey/<reason>')
 @auth.oidc_auth
 def generate_api_key(reason: str):
@@ -223,6 +237,7 @@ def return_json(quote: Quote):
     :return: Returns a dictionary of the quote object formatted to return as JSON
     """
     return {
+        'id': quote.id,
         'quote': quote.quote,
         'submitter': quote.submitter,
         'speaker': quote.speaker,
@@ -271,16 +286,22 @@ def str_to_datetime(date:str) -> datetime:
     return datetime.strptime(date, "%m-%d-%Y")
 
 
-def query_builder(start: str, end: str, submitter: str, speaker: str):
+def query_builder(start: str, end: str, submitter: str, speaker: str, id_num = -1):
     """
     Builds a sqlalchemy query.
     :param start: (optional, unless end provided) The date string for the start of the desired range.
     If end is not provided, start specifies a single day's fiter
     :param end: (optional) The date string for the end of the desired range.
     :param submitter: (optional) The CSH username of the submitter to search for.
+    :param id_num: (optional) The id of the quote to access from the database.
     :return: The query as defined by the given parameters
     """
     query = Quote.query
+
+    # If an ID is specified, we only need one quote. Don't bother with the other filtering
+    if id_num != -1:
+        query.filter_by(id=id_num)
+        return query
 
     if start is not None:
         start = str_to_datetime(start)
