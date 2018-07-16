@@ -177,7 +177,7 @@ def newest():
 @app.route('/<api_key>/<qid>', methods=['GET'])
 @cross_origin(headers=['Content-Type'])
 @check_key(api_key)
-def newest():
+def quote_id():
     """
     Queries the database for the specified quote.
     :return: Returns the specified quote if exists, else 'none'
