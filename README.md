@@ -61,10 +61,6 @@ Returns the newest result from the submitter = `matted`
 
 Route produces a list of quotes between the two dates. 
 
-## `/<api_key>/<qid>` : `GET`
-
-Returns the specified quote. Ignores query parameters.
-
 ## `/<api_key>/create` : `PUT`
 
 **Required Parameters: JSON Object**
