@@ -86,3 +86,20 @@ Requires a reason as to the use of the API key. A key has a unique owner/reason 
 ```
 91651at924r55egdfac5
 ```
+
+
+## Dev Setup
+This project is built in Python 3, and all of its dependencies are accesible via pip.
+
+Reccomended setup (from inside your repository directory)
+```
+python3 -m virtualenv venv # Sets up virtualenve in the venv directory in your working directory
+source venv/bin/activate # Activates the virtual environment
+pip install -r requirements.txt # Installs all of the dependencies listed in the requirements to the virtualenv
+```
+
+At this point all the dependencies are installed, so copy `config.env.py` to `config.py` and fill in fields.
+You probably need to set `SERVER_NAME = 127.0.0.1:5000`, which is where flask will put local applications.
+
+All that's left is running it with `flask run`. Flask should automatically find `app.py`,
+though you may want to set debug mode with `export FLASK_ENV=development` before you run it.
