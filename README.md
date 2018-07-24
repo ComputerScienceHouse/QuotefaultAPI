@@ -1,6 +1,7 @@
 Quotefault API
 ==============
 [![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
+[![Travis](https://travis-ci.org/ComputerScienceHouse/QuotefaultAPI.svg?branch=master)](https://travis-ci.org/ComputerScienceHouse/QuotefaultAPI)
 
 
 A RESTful API for interacting with CSH Quotefault, no webgui required!
