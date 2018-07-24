@@ -6,3 +6,4 @@ Flask-SQLAlchemy
 PyMySQL
 SQLAlchemy
 flask-cors
+pylint==1.8.3
