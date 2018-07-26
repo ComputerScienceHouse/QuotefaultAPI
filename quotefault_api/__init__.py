@@ -38,11 +38,11 @@ class Quote(db.Model):
     submitter = db.Column(db.String(80))
     quote = db.Column(db.String(200), unique=True)
     speaker = db.Column(db.String(50))
-    quote_time = db.Column(db.DateTime)
+    quoteTime = db.Column(db.DateTime)
 
     # initialize a row for the Quote table
     def __init__(self, submitter, quote, speaker):
-        self.quote_time = datetime.now()
+        self.quoteTime = datetime.now()
         self.submitter = submitter
         self.quote = quote
         self.speaker = speaker
@@ -252,7 +252,7 @@ def return_json(quote: Quote):
         'quote': quote.quote,
         'submitter': quote.submitter,
         'speaker': quote.speaker,
-        'quoteTime': quote.quote_time,
+        'quoteTime': quote.quoteTime,
     }
 
 
@@ -315,7 +315,7 @@ def query_builder(start: str, end: str, submitter: str, speaker: str, id_num=-1)
             end = str_to_datetime(end)
         else:
             end = start + timedelta(1)
-        query = query.filter(Quote.quote_time.between(start, end))
+        query = query.filter(Quote.quoteTime.between(start, end))
 
     if submitter is not None:
         query = query.filter_by(submitter=submitter)
