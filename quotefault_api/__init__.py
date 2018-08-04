@@ -65,7 +65,7 @@ class APIKey(db.Model):
 def index():
     db.create_all()
     f = open('README.md', 'r')
-    return markdown.markdown(f.read())
+    return markdown.markdown(f.read(), extensions=['markdown.extensions.fenced_code'])
 
 
 @app.route('/<api_key>/between/<start>/<limit>', methods=['GET'])
