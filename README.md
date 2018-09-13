@@ -98,7 +98,7 @@ This project is built in Python 3, and all of its dependencies are accesible via
 [This guide](https://docs.python-guide.org/starting/installation/#installation-guides) should cover installing python
 then you need to make sure you [have pip installed](https://packaging.python.org/tutorials/installing-packages/#ensure-you-can-run-pip-from-the-command-line).
 
-###Reccomended setup
+###Recommended setup
 From inside your repository directory run
 ```
 python3 -m virtualenv venv # Sets up virtualenve in the venv directory in your working directory
