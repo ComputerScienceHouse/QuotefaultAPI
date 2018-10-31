@@ -10,12 +10,11 @@ A RESTful API for interacting with CSH Quotefault, no webgui required!
 
 ```json
 {
-  "533": {
-    "quote": "I can't wait to get to New York and kill everyone", 
-    "quoteTime": "Fri, 27 Oct 2017 22:14:31 GMT", 
-    "speaker": "Tanat", 
-    "submitter": "matted"
-  }
+    "id": "533",
+    "quote": "I can't wait to get to New York and kill everyone",
+    "submitter": "matted",
+    "speaker": "Tanat",
+    "quoteTime": "Fri, 27 Oct 2017 22:14:31 GMT"
 }
 ```
 
@@ -48,12 +47,11 @@ Returns the newest result from the submitter = `matted`
 
 ```json
 {
-  "533": {
-    "quote": "I can't wait to get to New York and kill everyone", 
-    "quoteTime": "Fri, 27 Oct 2017 22:14:31 GMT", 
-    "speaker": "Tanat", 
-    "submitter": "matted"
-  }
+    "id": "533",
+    "quote": "I can't wait to get to New York and kill everyone",
+    "submitter": "matted",
+    "speaker": "Tanat",
+    "quoteTime": "Fri, 27 Oct 2017 22:14:31 GMT"
 }
 ```
 
