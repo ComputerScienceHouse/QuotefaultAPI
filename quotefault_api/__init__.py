@@ -3,6 +3,7 @@ import json
 import os
 import random
 from datetime import datetime, timedelta
+from functools import wraps
 
 import markdown
 import requests
@@ -11,8 +12,6 @@ from flask_cors import cross_origin
 from flask_pyoidc.flask_pyoidc import OIDCAuthentication
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import UniqueConstraint
-
-from functools import wraps
 
 app = Flask(__name__)
 
@@ -118,14 +117,11 @@ def create_quote():
 
     if data['quote'] and data['speaker']:
         quote = data['quote']
-        if 'submitter' in data:
-            submitter = data['submitter']
-        else:
-            submitter = APIKey.query.filter_by(hash=api_key).all()[0].owner
+        submitter = data['submitter']
         speaker = data['speaker']
 
-        if not quote or not speaker:
-            return "You didn't fill in one of your fields. You literally only had two responsibilities, " \
+        if not quote or not speaker or not submitter:
+            return "You didn't fill in one of your fields. You literally only had three responsibilities, " \
                    "and somehow you fucked them up.", 400
         if Quote.query.filter(Quote.quote == quote).first() is not None:
             return "That quote has already been said, asshole", 400
