@@ -67,6 +67,8 @@ def check_key(func):
     Creates a wrapper for 'func'.
     Checks if the api key is valid. If it is, return the result of the function.
     If not, return an error message.
+    :param func: The function that needs authorisation
+    :return: The result of the function or 403 error
     """
     @wraps(func)
     def wrapper(api_key, *args, **kwargs):
@@ -92,7 +94,6 @@ def between(start: str, limit: str):
     Shows all quotes submitted between two dates
     :param start: Start date string
     :param limit: End date string
-    :param api_key: API key allowing for the use of the API
     :return: Returns a JSON list of quotes between the two dates
     """
     submitter = request.args.get('submitter')
@@ -109,7 +110,6 @@ def between(start: str, limit: str):
 def create_quote():
     """
     Put request to create a new Quote
-    :param api_key: API key allowing for the use of the API
     :return: The new Quote object that was created by the request
     """
     # Gets the body of the request and recieves it as JSON
@@ -142,7 +142,6 @@ def create_quote():
 def all_quotes():
     """
     Returns all Quotes in the database
-    :param api_key: API key allowing for the use of the API
     :return: Returns JSON of all quotes in the Quotefault database
     """
     date = request.args.get('date')
@@ -160,7 +159,6 @@ def all_quotes():
 def random_quote():
     """
     Returns a random quote from the database
-    :param api_key: API key allowing for the use of the API
     :return: Returns a random quote
     """
     date = request.args.get('date')
@@ -179,7 +177,6 @@ def random_quote():
 def newest():
     """
     Queries the database for the newest quote, with optional parameters to define submitter or datetime stamp
-    :param api_key: API key allowing for the use of the API
     :return: Returns the newest quote found during the query
     """
     date = request.args.get('date')
@@ -197,7 +194,6 @@ def newest():
 def quote_id(qid: int):
     """
     Queries the database for the specified quote.
-    :param api_key: API key allowing for the use of the API
     :param qid: The id of the quote to find
     :return: Returns the specified quote if exists, else 'none'
     """
