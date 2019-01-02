@@ -133,7 +133,8 @@ def create_quote():
         db.session.flush()
         db.session.commit()
         # Returns the json of the quote
-        return jsonify(return_json(new_quote))
+        return jsonify(return_json(new_quote)), 201
+    return "You need to actually fill in your fields.", 400
 
 
 @app.route('/<api_key>/all', methods=['GET'])
