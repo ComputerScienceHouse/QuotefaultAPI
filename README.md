@@ -78,6 +78,18 @@ Returns the specified quote. Ignores query parameters.
 }
 ```
 
+## `/<api_key>/markov` : `GET`
+
+Optionally takes speaker and or submitter query string parameters.
+
+Generates a quote using a Markov chain based on all quotes, optionally filted by speaker or submitter.
+
+## `/<api_key>/markov/<count>` : `GET`
+
+Optionally takes speaker and or submitter query string parameters.
+
+Generates a list of  quotes (length = count) using a Markov chain based on all quotes, optionally filted by speaker or submitter.
+
 ## `/generatekey/<reason>` : `GET`
 
 Requires a reason as to the use of the API key. A key has a unique owner/reason pair.
