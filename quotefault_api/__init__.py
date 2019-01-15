@@ -13,6 +13,8 @@ from flask_pyoidc.flask_pyoidc import OIDCAuthentication
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import UniqueConstraint
 
+import markov
+
 app = Flask(__name__)
 
 if os.path.exists(os.path.join(os.getcwd(), "config.py")):
@@ -202,6 +204,42 @@ def quote_id(qid: int):
     if not query.all():
         return "none"
     return jsonify(return_json(query.first()))
+
+
+@app.route('/<api_key>/markov', methods=['GET'])
+@cross_origin(headers=['Content-Type'])
+@check_key
+def markov_single():
+    """
+    Generates a quote using a markov chain, optionally constraining input to a speaker or submitter.
+    """
+    submitter = request.args.get('submitter')
+    speaker = request.args.get('speaker')
+    query = query_builder(None, None, submitter, speaker)
+    if query.all() is None:
+        return "none"
+    markov.reset()
+    markov.parse([quote.quote for quote in query.all()])
+    return jsonify(markov.generate())
+
+
+
+@app.route('/<api_key>/markov/<count>', methods=['GET'])
+@cross_origin(headers=['Content-Type'])
+@check_key
+def markov_list(count: int):
+    """
+    Generates a list of quotes using a markov chain, optionally constraining input to a speaker or submitter.
+    """
+    submitter = request.args.get('submitter')
+    speaker = request.args.get('speaker')
+    query = query_builder(None, None, submitter, speaker)
+    if query.all() is None:
+        return "none"
+    markov.reset()
+    markov.parse([quote.quote for quote in query.all()])
+    return jsonify(markov.generate_list(int(count)))
+
 
 
 @app.route('/generatekey/<reason>')
