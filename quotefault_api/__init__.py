@@ -125,6 +125,8 @@ def create_quote():
         if not quote or not speaker or not submitter:
             return "You didn't fill in one of your fields. You literally only had three responsibilities, " \
                    "and somehow you fucked them up.", 400
+        if speaker == submitter:
+            return "Quote someone else you narcissist.", 400
         if Quote.query.filter(Quote.quote == quote).first() is not None:
             return "That quote has already been said, asshole", 400
         if len(quote) > 200:
