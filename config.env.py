@@ -13,6 +13,9 @@ SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI', 'sqlite:///{
 #DB_NAME = os.environ.get('API_QUOTEFAULT_DB_NAME', 'quotefault')
 #DB_PASSWORD = os.environ.get('API_QUOTEFAULT_DB_PASSWORD', '')
 
+# Do not use connections to the database older than 500 seconds
+SQLALCHEMY_POOL_RECYCLE = 500
+
 # OpenID Connect SSO config
 OIDC_ISSUER = os.environ.get('API_QUOTEFAULT_OIDC_ISSUER', 'https://sso.csh.rit.edu/realms/csh')
 OIDC_CLIENT_CONFIG = {
