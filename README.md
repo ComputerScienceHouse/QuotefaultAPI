@@ -18,7 +18,7 @@ A RESTful API for interacting with CSH Quotefault, no webgui required!
 }
 ```
 
-All `date` paramaters use the format `mm-dd-yyyy`.
+All `date` paramaters should use the format `yyyymmdd`. `mm-dd-yyyy` is still accepted for now but may be deprecated in the future.
 
 If no quotes are found, all routes return 'none'.
 
