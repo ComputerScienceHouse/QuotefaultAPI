@@ -187,7 +187,8 @@ def newest():
     date = request.args.get('date')
     submitter = request.args.get('submitter')
     speaker = request.args.get('speaker')
-    query = query_builder(date, None, submitter, speaker).order_by(Quote.id.desc())
+    query = query_builder(date, None, submitter,
+                          speaker).order_by(Quote.id.desc())
     if not query.all():
         return "none"
     return jsonify(return_json(query.first()))
@@ -225,7 +226,6 @@ def markov_single():
     return jsonify(markov.generate())
 
 
-
 @app.route('/<api_key>/markov/<count>', methods=['GET'])
 @cross_origin(headers=['Content-Type'])
 @check_key
@@ -241,7 +241,6 @@ def markov_list(count: int):
     markov.reset()
     markov.parse([quote.quote for quote in query.all()])
     return jsonify(markov.generate_list(int(count)))
-
 
 
 @app.route('/generatekey/<reason>')
@@ -323,11 +322,15 @@ def check_key_unique(owner: str, reason: str) -> bool:
 
 def str_to_datetime(date: str) -> datetime:
     """
-    Converts a string in the format mm-dd-yyyy to a datetime object
+    Converts a string in either yyyymmdd or mm-dd-yyyy format to a datetime object
     :param date: the date string
     :return: a datetime object equivalent to the date string
     """
-    return datetime.strptime(date, "%m-%d-%Y")
+    # hyphen characters are used to differentiate between the two formats
+    if "-" not in date:
+        return datetime.strptime(date, "%m-%d-%Y")
+    else:
+        return datetime.strptime(date, "%Y%m%d")
 
 
 def query_builder(start: str, end: str, submitter: str, speaker: str, id_num=-1):
