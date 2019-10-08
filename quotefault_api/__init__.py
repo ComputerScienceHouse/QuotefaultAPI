@@ -326,11 +326,12 @@ def str_to_datetime(date: str) -> datetime:
     :param date: the date string
     :return: a datetime object equivalent to the date string
     """
+    format = "%Y%m%d"
     # hyphen characters are used to differentiate between the two formats
-    if "-" not in date:
-        return datetime.strptime(date, "%m-%d-%Y")
-    else:
-        return datetime.strptime(date, "%Y%m%d")
+    if "-" in date:
+        format = "%m-%d-%Y"
+
+    return datetime.strptime(date, format)
 
 
 def query_builder(start: str, end: str, submitter: str, speaker: str, id_num=-1):
