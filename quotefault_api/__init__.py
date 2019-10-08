@@ -187,8 +187,7 @@ def newest():
     date = request.args.get('date')
     submitter = request.args.get('submitter')
     speaker = request.args.get('speaker')
-    query = query_builder(date, None, submitter,
-                          speaker).order_by(Quote.id.desc())
+    query = query_builder(date, None, submitter, speaker).order_by(Quote.id.desc())
     if not query.all():
         return "none"
     return jsonify(return_json(query.first()))
