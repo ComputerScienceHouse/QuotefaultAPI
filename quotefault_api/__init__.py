@@ -225,7 +225,6 @@ def markov_single():
     return jsonify(markov.generate())
 
 
-
 @app.route('/<api_key>/markov/<count>', methods=['GET'])
 @cross_origin(headers=['Content-Type'])
 @check_key
@@ -241,7 +240,6 @@ def markov_list(count: int):
     markov.reset()
     markov.parse([quote.quote for quote in query.all()])
     return jsonify(markov.generate_list(int(count)))
-
 
 
 @app.route('/generatekey/<reason>')
@@ -323,11 +321,16 @@ def check_key_unique(owner: str, reason: str) -> bool:
 
 def str_to_datetime(date: str) -> datetime:
     """
-    Converts a string in the format mm-dd-yyyy to a datetime object
+    Converts a string in either yyyymmdd or mm-dd-yyyy format to a datetime object
     :param date: the date string
     :return: a datetime object equivalent to the date string
     """
-    return datetime.strptime(date, "%m-%d-%Y")
+    str_format = "%Y%m%d"
+    # hyphen characters are used to differentiate between the two formats
+    if "-" in date:
+        str_format = "%m-%d-%Y"
+
+    return datetime.strptime(date, str_format)
 
 
 def query_builder(start: str, end: str, submitter: str, speaker: str, id_num=-1):
